@@ -1,0 +1,16 @@
+﻿<Application x:Class="LABPOWER_APC.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:LABPOWER_APC"
+             xmlns:View="clr-namespace:LABPOWER_APC.View"
+             xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
+             StartupUri="View/UPSVIEW.xaml">
+    <Application.Resources>
+
+        <DataTemplate x:Name="UPSVIEW_Templates" DataType="{x:Type ViewModel:UPS}">
+            <View:UPSVIEW/>
+        </DataTemplate>
+        
+        
+    </Application.Resources>
+</Application>
