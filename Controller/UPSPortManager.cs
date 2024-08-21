@@ -115,7 +115,7 @@ namespace LABPOWER_APC.Controller
         {
             string response = null;
             lock (lockObject)
-            {
+             {
 
                 try
                 {
@@ -177,7 +177,7 @@ namespace LABPOWER_APC.Controller
                         try
                         {
                             _serialPort.Open();
-                            WriteAndWaitForResponse("Y", 300);
+                            WriteAndWaitForResponse("Y", 100);
                             string model = WriteAndWaitForResponse(((char)1).ToString(), 200);
                             if (model.ToLower().Contains("smart-ups"))
                             {

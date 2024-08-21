@@ -35,6 +35,7 @@ namespace LABPOWER_APC.Model
 
         public enum GracefulDelay
         {
+            
             [Description("1 Minute")]
             OneMinute = 60,
             [Description("3 Minutes")]
@@ -169,7 +170,7 @@ namespace LABPOWER_APC.Model
         {
             _manager = manager;
             timer = new Timer();
-            timer.Interval = 2000;
+            timer.Interval = 5000;
             timer.Elapsed += t_Elapsed;
             timer.Start();
         }
@@ -200,9 +201,9 @@ namespace LABPOWER_APC.Model
                 OutputVoltage = _manager.WriteAndWaitForResponse("O", 100);
                 BatteryLevel = _manager.WriteAndWaitForResponse("f", 100);
                 UPSStatus.GracefulDelay shutdownDelayEnum = (GracefulDelay)Enum.Parse(typeof(GracefulDelay), _manager.WriteAndWaitForResponse("p", 100));
-                ShutdownDelay = UPSStatus.GetEnumDescription(shutdownDelayEnum);
+                ShutdownDelay = GetEnumDescription(shutdownDelayEnum);
                 AlarmDelay = GetEnumDescription(SetAlarmDelayEnum(_manager.WriteAndWaitForResponse("k", 100)));
-                Model = _manager.WriteAndWaitForResponse(((char)1).ToString(), 175);
+                Model = _manager.WriteAndWaitForResponse(((char)1).ToString(), 125);
             }
         }
 

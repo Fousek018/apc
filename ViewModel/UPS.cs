@@ -12,6 +12,10 @@ using System.Timers;
 using System.IO.Ports;
 using System.IO;
 using Timer = System.Timers.Timer;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace LABPOWER_APC.ViewModel
 {
@@ -21,34 +25,74 @@ namespace LABPOWER_APC.ViewModel
     }
     public partial class UPS : ObservableObject, IMainVM
     {
+        // Přidejte kolekci pro hodnoty výčtu
+        public ObservableCollection<String> GracefulDelayValues { get; }
+        public ObservableCollection<String> AlarmValues { get; }
+
+        private string _selectedGracefulDelay;
+        public string SelectedGracefulDelay
+        {
+            get => _selectedGracefulDelay;
+            set
+            {
+                SetProperty(ref _selectedGracefulDelay, value);
+                ChangeShutdownDelay(value); // Spustí funkci při změně hodnoty
+            }
+        }
+
+        private string _selectedAlarmDelay;
+        public string SelectedAlarmDelay
+        {
+            get => _selectedAlarmDelay;
+            set
+            {
+                SetProperty(ref _selectedAlarmDelay, value);
+                ChangeAlarmDelay(value); // Spustí funkci při změně hodnoty
+            }
+        }
+
         //OBS properties
         [ObservableProperty] string _Port = "UKNOWN";
         [ObservableProperty] string _B_status = "UKNOWN";
+        [ObservableProperty] string _Model = "UKNOWN";
+        [ObservableProperty] string _OutputVoltage = "UKNOWN";
+        [ObservableProperty] string _PowerType = "UKNOWN";
+        [ObservableProperty] string _Tries = "UKNOWN";
+        [ObservableProperty] string _ShutdownDelay = "UKNOWN";
+        [ObservableProperty] string _AlarmDelay = "UKNOWN";
+        [ObservableProperty] int _ShutdownTimeLeft;
 
         public UPSStatus Status;
         public UPSPortManager PortManager;
         public UPSSettings Settings;
+        public UPSSettings Settings2;
         private Timer computerShutdownTimer;
 
         public UPS()
         {
+
+            
             Settings = UPSSettings.Deserialize();
+            
             PortManager = new UPSPortManager(Settings);
             Status = new UPSStatus(PortManager);
             Status.PropertyChanged += Status_PropertyChanged;
             PortManager.WriteAndWaitForResponse("Y", 100);
-            Settings.PropertyChanged += (sender, e) =>
-            {
-                if (e.PropertyName == nameof(Settings.PortName))
-                {
-                    Port = Settings.PortName;
-                }
-            };
+
+              ShutdownTimeLeft = Settings.ShutdownTimeLeft;
+
+            GracefulDelayValues = new ObservableCollection<string>();
+            EnumHelper.FillEnumDescriptions<UPSStatus.GracefulDelay>(GracefulDelayValues);
+
+            AlarmValues = new ObservableCollection<string>();
+            EnumHelper.FillEnumDescriptions<UPSStatus.AlarmDelayEnum>(AlarmValues);
+
             //Shutdowning upc after hibernation or sleep mode
             //SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
 
         }
+        
 
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
@@ -72,13 +116,21 @@ namespace LABPOWER_APC.ViewModel
 
         void Status_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            OutputVoltage = Status.OutputVoltage;
+            B_status = Status.BatteryLevel;
+            Model = Status.Model;
+            PowerType = Status.PowerType.ToString();
+            Port = Settings.PortName;
+            ShutdownDelay = Status.ShutdownDelay;
+            //AlarmDelay = Status.AlarmDelay;
+
             if (e.PropertyName.Equals("PowerType"))
             {
                 if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
                 {
                     computerShutdownTimer = new Timer();
                     Settings.ShutdownTimeLeft = Settings.ComputerShutdownDelay;
-                    computerShutdownTimer.Interval = 1000;
+                    computerShutdownTimer.Interval = 500;
                     computerShutdownTimer.Elapsed += computerShutdownTimer_Elapsed;
                     computerShutdownTimer.Start();
                 }
@@ -94,7 +146,7 @@ namespace LABPOWER_APC.ViewModel
 
         void computerShutdownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Settings.ShutdownTimeLeft -= 1;
+            ShutdownTimeLeft = (Settings.ShutdownTimeLeft -= 1);
             if (Settings.ShutdownTimeLeft <= 0)
             {
                 ShutdownGracefully();
@@ -113,16 +165,18 @@ namespace LABPOWER_APC.ViewModel
             Thread.Sleep(150);
             string listen = PortManager.WriteAndWaitForResponse("S", 100);
             int numTries = 0;
-            int maxTries = 15;
-            while (listen != "OK" || listen != "*" && numTries < maxTries)
+            int maxTries = 150;
+            while (listen != "OK" && numTries < maxTries)
             {
                 Thread.Sleep(50);
                 listen = PortManager.WriteAndWaitForResponse("S", 100);
                 numTries++;
+                Tries = listen;
             }
             PortManager.WriteSerial("K");
             Thread.Sleep(750);
             PortManager.WriteSerial("K");
+            //Tries = 1;
         }
 
         /// <summary>
@@ -135,8 +189,13 @@ namespace LABPOWER_APC.ViewModel
             PortManager.WriteSerial(((char)14).ToString());
         }
 
-        public void ChangeShutdownDelay(UPSStatus.GracefulDelay newDelay)
+        
+        public void ChangeShutdownDelay(string newDelayDescription)
         {
+            var newDelay = Enum.GetValues(typeof(UPSStatus.GracefulDelay))
+                              .Cast<UPSStatus.GracefulDelay>()
+                              .FirstOrDefault(e => UPSStatus.GetEnumDescription(e) == newDelayDescription);
+
             Status.PauseTimer();
             Thread.Sleep(250);
             string currentDelay = PortManager.WriteAndWaitForResponse("p", 100);
@@ -151,8 +210,12 @@ namespace LABPOWER_APC.ViewModel
             Status.StartTimer();
         }
 
-        public void ChangeAlarmDelay(UPSStatus.AlarmDelayEnum newDelay)
+        public void ChangeAlarmDelay(string newDelayDescription)
         {
+            var newDelay = Enum.GetValues(typeof(UPSStatus.AlarmDelayEnum))
+                                .Cast<UPSStatus.AlarmDelayEnum>()
+                                .FirstOrDefault(e => UPSStatus.GetEnumDescription(e) == newDelayDescription);
+
             Status.PauseTimer();
             Thread.Sleep(250);
             string currentDelay = PortManager.WriteAndWaitForResponse("k", 100);
@@ -182,5 +245,26 @@ namespace LABPOWER_APC.ViewModel
             }
             return delayEnum;
         }
+        [RelayCommand]
+        public void SerializeSettings()
+        {
+            UPSSettings.Serialize(Settings);
+        }
     }
+    public static class EnumHelper
+    {
+        public static void FillEnumDescriptions<T>(ObservableCollection<string> collection) where T : Enum
+        {
+            collection.Clear();
+            foreach (var value in Enum.GetValues(typeof(T)))
+            {
+                FieldInfo field = value.GetType().GetField(value.ToString());
+                DescriptionAttribute? attribute = field.GetCustomAttributes(typeof(DescriptionAttribute), false)
+                                                      .FirstOrDefault() as DescriptionAttribute;
+
+                collection.Add(attribute == null ? value.ToString() : attribute.Description);
+            }
+        }
+    }
+
 }

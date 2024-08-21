@@ -21,7 +21,7 @@ namespace LABPOWER_APC.Model
         int _dataBits = 8;
         StopBits _stopBits = StopBits.One;
         int computerShutdownDelay = 20000;
-        int shutdownTimeLeft = 20000;
+        int shutdownTimeLeft = 5000;
         public string PortName
         {
             get { return _portName; }
@@ -128,7 +128,7 @@ namespace LABPOWER_APC.Model
         /// <param name="info">Info to serialize</param>
         public static void Serialize(UPSSettings info)
         {
-            string saveDirectory = @"C:\programdata\esco\";
+            string saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string fileName = "ups.xml";
 
             var serializer = new XmlSerializer(info.GetType());
@@ -149,7 +149,7 @@ namespace LABPOWER_APC.Model
         /// <returns>returns UPSSettings from settings file or default settings if no file found</returns>
         public static UPSSettings Deserialize()
         {
-            string saveDirectory = @"C:\programdata\esco\";
+            string saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string fileName = "ups.xml";
             var serializer = new XmlSerializer(typeof(UPSSettings));
             UPSSettings settings = new UPSSettings();

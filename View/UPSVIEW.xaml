@@ -6,8 +6,12 @@
         xmlns:local="clr-namespace:LABPOWER_APC.View"
         xmlns:View="clr-namespace:LABPOWER_APC.View"
         xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
+        xmlns:Model="clr-namespace:LABPOWER_APC.Model"
         mc:Ignorable="d"
-        Title="UPSVIEW" Height="450" Width="800">
+        Title="UPSVIEW" Height="800" Width="400">
+
+   
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -34,7 +38,58 @@
                     <Label x:Name="B_status" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
                              Content="{Binding B_status}"/>
                 </StackPanel>
-                
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="Model" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Content="{Binding Model}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="OutputVolatge" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="OutputVolatge" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Content="{Binding OutputVoltage}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Tries" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="Tries" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Content="{Binding Tries}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="PowerType" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="PowerType" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Content="{Binding PowerType}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Shutdown Time" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="S_time" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Content="{Binding ShutdownDelay}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Alarm Setting" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="A_setting" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Content="{Binding AlarmDelay}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Time left to resuply power" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Label x:Name="Time_to_resuply" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Content="{Binding ShutdownTimeLeft}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    
+                    <ComboBox ItemsSource="{Binding GracefulDelayValues}"
+                              SelectedItem="{Binding SelectedGracefulDelay, Mode=TwoWay}" Text="{Binding ShutdownDelay}"/>
+
+                    <ComboBox ItemsSource="{Binding AlarmValues}"
+                              SelectedItem="{Binding SelectedAlarmDelay, Mode=TwoWay}" Text="{Binding AlarmDelay}"/>
+                    <Button Content="Save" Command="{Binding SerializeSettingsCommand}"/>
+                </StackPanel>
 
             </StackPanel>
         </Grid>
