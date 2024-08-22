@@ -1,21 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LABPOWER_APC.Controller;
 using LABPOWER_APC.Model;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using System.IO.Ports;
-using System.IO;
-using Timer = System.Timers.Timer;
-using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace LABPOWER_APC.ViewModel
 {
@@ -65,21 +57,23 @@ namespace LABPOWER_APC.ViewModel
         public UPSStatus Status;
         public UPSPortManager PortManager;
         public UPSSettings Settings;
-        public UPSSettings Settings2;
         private Timer computerShutdownTimer;
+
+
+
 
         public UPS()
         {
 
-            
+
             Settings = UPSSettings.Deserialize();
-            
+
             PortManager = new UPSPortManager(Settings);
             Status = new UPSStatus(PortManager);
             Status.PropertyChanged += Status_PropertyChanged;
             PortManager.WriteAndWaitForResponse("Y", 100);
 
-              ShutdownTimeLeft = Settings.ShutdownTimeLeft;
+            ShutdownTimeLeft = Settings.ShutdownTimeLeft;
 
             GracefulDelayValues = new ObservableCollection<string>();
             EnumHelper.FillEnumDescriptions<UPSStatus.GracefulDelay>(GracefulDelayValues);
@@ -92,7 +86,7 @@ namespace LABPOWER_APC.ViewModel
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
 
         }
-        
+
 
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
@@ -122,15 +116,14 @@ namespace LABPOWER_APC.ViewModel
             PowerType = Status.PowerType.ToString();
             Port = Settings.PortName;
             ShutdownDelay = Status.ShutdownDelay;
-            //AlarmDelay = Status.AlarmDelay;
+            AlarmDelay = Status.AlarmDelay;
 
             if (e.PropertyName.Equals("PowerType"))
             {
                 if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
                 {
                     computerShutdownTimer = new Timer();
-                    Settings.ShutdownTimeLeft = Settings.ComputerShutdownDelay;
-                    computerShutdownTimer.Interval = 500;
+                    computerShutdownTimer.Interval = 1000;
                     computerShutdownTimer.Elapsed += computerShutdownTimer_Elapsed;
                     computerShutdownTimer.Start();
                 }
@@ -139,6 +132,7 @@ namespace LABPOWER_APC.ViewModel
                     if (computerShutdownTimer != null)
                     {
                         computerShutdownTimer.Stop();
+                        ShutdownTimeLeft  = (Settings.ShutdownTimeLeft = 20);
                     }
                 }
             }
@@ -149,6 +143,8 @@ namespace LABPOWER_APC.ViewModel
             ShutdownTimeLeft = (Settings.ShutdownTimeLeft -= 1);
             if (Settings.ShutdownTimeLeft <= 0)
             {
+                computerShutdownTimer.Stop();
+
                 ShutdownGracefully();
                 //Process.Start("shutdown", "/s /t 0");
             }
@@ -159,13 +155,15 @@ namespace LABPOWER_APC.ViewModel
         /// </summary>
         public void ShutdownGracefully()
         {
+            ShutdownTimeLeft = (Settings.ShutdownTimeLeft = 20);
+
             PortManager.WriteSerial("Y");
             Thread.Sleep(150);
             PortManager.WriteSerial("U");
             Thread.Sleep(150);
             string listen = PortManager.WriteAndWaitForResponse("S", 100);
             int numTries = 0;
-            int maxTries = 150;
+            int maxTries = 15;
             while (listen != "OK" && numTries < maxTries)
             {
                 Thread.Sleep(50);
@@ -173,6 +171,8 @@ namespace LABPOWER_APC.ViewModel
                 numTries++;
                 Tries = listen;
             }
+                        ShutdownTimeLeft  = (Settings.ShutdownTimeLeft = 20);
+
             PortManager.WriteSerial("K");
             Thread.Sleep(750);
             PortManager.WriteSerial("K");
@@ -189,7 +189,7 @@ namespace LABPOWER_APC.ViewModel
             PortManager.WriteSerial(((char)14).ToString());
         }
 
-        
+
         public void ChangeShutdownDelay(string newDelayDescription)
         {
             var newDelay = Enum.GetValues(typeof(UPSStatus.GracefulDelay))

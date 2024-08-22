@@ -21,7 +21,7 @@ namespace LABPOWER_APC.Model
         int _dataBits = 8;
         StopBits _stopBits = StopBits.One;
         int computerShutdownDelay = 20000;
-        int shutdownTimeLeft = 5000;
+        int shutdownTimeLeft = 20000;
         public string PortName
         {
             get { return _portName; }
@@ -136,8 +136,12 @@ namespace LABPOWER_APC.Model
             {
                 Directory.CreateDirectory(saveDirectory);
             }
-            System.IO.File.Delete(saveDirectory + fileName);
-            using (var writer = XmlWriter.Create(saveDirectory + fileName))
+            string filePath = Path.Combine(saveDirectory, fileName);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            using (var writer = XmlWriter.Create(filePath))
             {
                 serializer.Serialize(writer, info);
             }
@@ -153,9 +157,10 @@ namespace LABPOWER_APC.Model
             string fileName = "ups.xml";
             var serializer = new XmlSerializer(typeof(UPSSettings));
             UPSSettings settings = new UPSSettings();
-            if (File.Exists(saveDirectory + fileName))
+            string filePath = Path.Combine(saveDirectory, fileName);
+            if (File.Exists(filePath))
             {
-                using (var reader = XmlReader.Create(saveDirectory + fileName))
+                using (var reader = XmlReader.Create(filePath))
                 {
                     settings = (UPSSettings)serializer.Deserialize(reader);
                 }
