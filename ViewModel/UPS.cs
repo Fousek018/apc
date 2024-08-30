@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using LABPOWER_APC.Controller;
 using LABPOWER_APC.Model;
 using LABPOWER_APC.Utilities;
+using LABPOWER_APC.View;
+using LABPOWER_APC.VM;
 using LiveCharts;
 using LiveCharts.Wpf;
 using Microsoft.Win32;
@@ -12,6 +14,7 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows.Threading;
@@ -534,8 +537,18 @@ namespace LABPOWER_APC.ViewModel
                 CS = UPSStatus.GetEnumDescription((UPSSettings.ShutdownEnum)Settings.ShutdownTimeLeft);
 
             }
-
-
+           
+        }
+        [RelayCommand]
+        public void PcSettings(ChosenNetworkDevice device)
+        {
+            if (device != null)
+            {
+                // Například: otevřete nové okno s informacemi o zařízení
+                var viewModel = new remotePCVM(device);
+                var window = new remotePCView { DataContext = viewModel };
+                window.Show();
+            }
         }
     }
 

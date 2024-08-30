@@ -21,6 +21,8 @@ namespace LABPOWER_APC.Model
     {
         public string? IPAddress { get; set; }
         public string? HostName { get; set; }
+        public string? nameOfTaks { get; set; }
+        public int? timeOfexecute { get; set; }
         public ChosenNetworkDevice()
         {
             

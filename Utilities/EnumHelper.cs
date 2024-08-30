@@ -8,6 +8,13 @@ namespace LABPOWER_APC.Utilities
 {
     public class EnumHelper<T>
     {
+        //Constructor with no parameters
+        public EnumHelper()
+        {
+            // Nastavení výchozích hodnot
+            Value = default(T);
+            Description = string.Empty;
+        }
         public EnumHelper(T value, string description)
         {
             Value = value;

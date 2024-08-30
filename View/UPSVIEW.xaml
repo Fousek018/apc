@@ -37,7 +37,7 @@
 
             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="MainStack">
                 <TextBlock x:Name="MainPcTextBlock" 
-                       Text="{Binding MainPc, FallbackValue= Fus }" 
+                       Text="{Binding MainPc}" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="2" Orientation="Vertical">
                     <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -53,7 +53,11 @@
                                         <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center"/>
                                     </StackPanel>
-                                    <Button Content="Remove" Command="{Binding DataContext.RemoveChosenDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    <Button Content="Remove" 
+                                            Command="{Binding DataContext.RemoveChosenDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" Padding="2"/>
+                                    <Button Content="Settings" 
+                                            Command="{Binding DataContext.PcSettingsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" Padding="2"/>
                                 </StackPanel>
                             </DataTemplate>

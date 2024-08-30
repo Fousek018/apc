@@ -1,0 +1,48 @@
+﻿<Window x:Class="LABPOWER_APC.View.remotePCView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LABPOWER_APC.View"
+        mc:Ignorable="d"
+        Title="remotePCView" Height="400" Width="300">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.ColumnSpan="2">
+            <Label Content="Remote PC settup" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="2">
+            <StackPanel>
+                <Label Content="{Binding RemoteName}" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="IP Address" VerticalAlignment="Center"/>
+                    <Label Content="{Binding IPAddress}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Task to kill"/>
+                    <ComboBox x:Name="TaskEnum"
+                              ItemsSource="{Binding AvailableTasks}" 
+                              SelectedItem="{Binding SelectedTask}" 
+                              SelectedIndex="0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Time to execute"/>
+                    <TextBox Text="Set time to execute" VerticalAlignment="Center" Opacity="0.5" FontSize="10"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        
+    </Grid>
+</Window>
