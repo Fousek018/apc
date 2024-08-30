@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using LABPOWER_APC.Model;
 using LABPOWER_APC.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +28,11 @@ namespace LABPOWER_APC.View
         {
             InitializeComponent();
             DataContext = Ioc.Default.GetService<UPS>();
+
+        }
+
+        private void ShutdownTimerCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
 
         }
     }

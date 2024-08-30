@@ -1,4 +1,6 @@
-﻿using LABPOWER_APC.Controller;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using LABPOWER_APC.Controller;
+using LABPOWER_APC.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,7 +13,8 @@ using Timer = System.Timers.Timer;
 
 namespace LABPOWER_APC.Model
 {
-    public class UPSStatus : INotifyPropertyChanged
+    public partial class UPSStatus : ObservableObject
+
     {
         #region Properties
 
@@ -46,119 +49,29 @@ namespace LABPOWER_APC.Model
             TenMinute = 600
         }
 
-        private PowerTypeEnum powerType;
-        public PowerTypeEnum PowerType
-        {
-            get { return powerType; }
-            set
-            {
-                if (powerType != value)
-                {
-                    powerType = value; OnPropertyChanged(new PropertyChangedEventArgs("PowerType"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private PowerTypeEnum _PowerType;
 
-        private string batteryVoltage;
-        public string BatteryVoltage
-        {
-            get { return batteryVoltage; }
-            set
-            {
-                if (batteryVoltage != value)
-                {
-                    batteryVoltage = value; OnPropertyChanged(new PropertyChangedEventArgs("BatteryVoltage"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _BatteryVoltage;
 
-        private string inputVoltage;
-        public string InputVoltage
-        {
-            get { return inputVoltage; }
-            set
-            {
-                if (inputVoltage != value)
-                {
-                    inputVoltage = value; OnPropertyChanged(new PropertyChangedEventArgs("InputVoltage"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _InputVoltage;
 
-        private string outputVoltage;
-        public string OutputVoltage
-        {
-            get { return outputVoltage; }
-            set
-            {
-                if (outputVoltage != value)
-                {
-                    outputVoltage = value; OnPropertyChanged(new PropertyChangedEventArgs("OutputVoltage"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _OutputVoltage;
 
-        private string batteryLevel;
-        public string BatteryLevel
-        {
-            get { return batteryLevel; }
-            set
-            {
-                if (batteryLevel != value)
-                {
-                    batteryLevel = value; OnPropertyChanged(new PropertyChangedEventArgs("BatteryLevel"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _BatteryLevel;
 
-        private string model;
-        public string Model
-        {
-            get { return model; }
-            set
-            {
-                if (model != value)
-                {
-                    model = value; OnPropertyChanged(new PropertyChangedEventArgs("Model"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _Model;
 
-        private string shutdownDelay;
-        public string ShutdownDelay
-        {
-            get { return shutdownDelay; }
-            set
-            {
-                if (shutdownDelay != value)
-                {
-                    shutdownDelay = value; OnPropertyChanged(new PropertyChangedEventArgs("ShutdownDelay"));
-                }
-            }
-        }
+        [ObservableProperty]
+        private string _ShutdownDelay;
 
-        private string alarmDelay;
-        public string AlarmDelay
-        {
-            get { return alarmDelay; }
-            set
-            {
-                if (alarmDelay != value)
-                {
-                    alarmDelay = value; OnPropertyChanged(new PropertyChangedEventArgs("AlarmDelay"));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, e);
-            }
-        }
+        [ObservableProperty]
+        private string _AlarmDelay;
 
         #endregion
 

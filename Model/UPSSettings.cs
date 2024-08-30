@@ -1,114 +1,51 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace LABPOWER_APC.Model
 {
-    public class UPSSettings : INotifyPropertyChanged
+    public partial class UPSSettings : ObservableObject
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        
-        private string _portName = "COM3";
-        int _baudRate = 2400;
-        Parity _parity = Parity.None;
-        int _dataBits = 8;
-        StopBits _stopBits = StopBits.One;
-        int computerShutdownDelay = 20000;
-        int shutdownTimeLeft = 20000;
-        public string PortName
-        {
-            get { return _portName; }
-            set
-            {
-                if (!_portName.Equals(value))
-                {
-                    _portName = value;
-                    SendPropertyChangedEvent("PortName");
-                }
-            }
-        }
-        /// <summary>
-        /// The baud rate.
-        /// </summary>
-        public int BaudRate
-        {
-            get { return _baudRate; }
-            set
-            {
-                if (_baudRate != value)
-                {
-                    _baudRate = value;
-                    SendPropertyChangedEvent("BaudRate");
-                }
-            }
-        }
+        [ObservableProperty]
+        public string _PortName = "COM0";
 
-        /// <summary>
-        /// One of the Parity values.
-        /// </summary>
-        public Parity Parity
-        {
-            get { return _parity; }
-            set
-            {
-                if (_parity != value)
-                {
-                    _parity = value;
-                    SendPropertyChangedEvent("Parity");
-                }
-            }
-        }
-        /// <summary>
-        /// The data bits value.
-        /// </summary>
-        public int DataBits
-        {
-            get { return _dataBits; }
-            set
-            {
-                if (_dataBits != value)
-                {
-                    _dataBits = value;
-                    SendPropertyChangedEvent("DataBits");
-                }
-            }
-        }
-        /// <summary>
-        /// One of the StopBits values.
-        /// </summary>
-        public StopBits StopBits
-        {
-            get { return _stopBits; }
-            set
-            {
-                if (_stopBits != value)
-                {
-                    _stopBits = value;
-                    SendPropertyChangedEvent("StopBits");
-                }
-            }
-        }
+        [ObservableProperty]
+        public int _BaudRate = 2400;
 
-        public int ComputerShutdownDelay
-        {
-            get { return computerShutdownDelay / 1000; }
-            set { computerShutdownDelay = value * 1000; SendPropertyChangedEvent("ComputerShutdownDelay"); }
-        }
+        [ObservableProperty]
+        public Parity _Parity = Parity.None;
 
-        public int ShutdownTimeLeft
-        {
-            get { return shutdownTimeLeft; }
-            set { shutdownTimeLeft = value; SendPropertyChangedEvent("ShutdownTimeLeft"); }
-        }
+        [ObservableProperty]
+        public int _DataBits = 8;
+
+        [ObservableProperty]
+        public StopBits _StopBits = StopBits.One;
 
 
+        [ObservableProperty]
+        public int _ShutdownTimeLeft = 5;
+
+        public enum ShutdownEnum
+        {
+
+            [Description("5 seconds")]
+            fiveSecond = 5,
+            [Description("10 seconds")]
+            tenSecond = 10,
+            [Description("15 seconds")]
+            fivteenSecond = 15,
+            
+        }
 
         #region Methods
 
@@ -116,57 +53,46 @@ namespace LABPOWER_APC.Model
         /// Send a PropertyChanged event
         /// </summary>
         /// <param name="propertyName">Name of changed property</param>
-        private void SendPropertyChangedEvent(String propertyName)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
+
 
         /// <summary>
         /// Serialize data to a settings file.
         /// </summary>
         /// <param name="info">Info to serialize</param>
-        public static void Serialize(UPSSettings info)
-        {
-            string saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string fileName = "ups.xml";
 
-            var serializer = new XmlSerializer(info.GetType());
-            if (!Directory.Exists(saveDirectory))
-            {
-                Directory.CreateDirectory(saveDirectory);
-            }
-            string filePath = Path.Combine(saveDirectory, fileName);
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-            using (var writer = XmlWriter.Create(filePath))
-            {
-                serializer.Serialize(writer, info);
-            }
+        public static string GetEnumDescription(Enum value)
+        {
+            FieldInfo fi = value.GetType().GetField(value.ToString());
+
+            DescriptionAttribute[] attributes =
+                (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            if (attributes != null && attributes.Length > 0)
+                return attributes[0].Description;
+            else
+                return value.ToString();
         }
 
         /// <summary>
         /// Deserialize data from settings file
         /// </summary>
         /// <returns>returns UPSSettings from settings file or default settings if no file found</returns>
-        public static UPSSettings Deserialize()
-        {
-            string saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string fileName = "ups.xml";
-            var serializer = new XmlSerializer(typeof(UPSSettings));
-            UPSSettings settings = new UPSSettings();
-            string filePath = Path.Combine(saveDirectory, fileName);
-            if (File.Exists(filePath))
-            {
-                using (var reader = XmlReader.Create(filePath))
-                {
-                    settings = (UPSSettings)serializer.Deserialize(reader);
-                }
-            }
-            return settings;
-        }
+        //public static UPSSettings Deserialize()
+        //{
+        //    string saveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        //    string fileName = "ups.xml";
+        //    var serializer = new XmlSerializer(typeof(UPSSettings));
+        //    UPSSettings settings = new UPSSettings();
+        //    string filePath = Path.Combine(saveDirectory, fileName);
+        //    if (File.Exists(filePath))
+        //    {
+        //        using (var reader = XmlReader.Create(filePath))
+        //        {
+        //            settings = (UPSSettings)serializer.Deserialize(reader);
+        //        }
+        //    }
+        //    return settings;
+        //}
     }
 }
 #endregion

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using LABPOWER_APC.ViewModel;
+using LABPOWER_APC.Model;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
@@ -24,6 +25,7 @@ namespace LABPOWER_APC
              new ServiceCollection()
                  .AddSingleton<IMainVM, UPS>()
                  .AddSingleton<UPS>()
+                 .AddSingleton<UPSSettings>()
                  .BuildServiceProvider()
 
              );

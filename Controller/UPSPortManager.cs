@@ -8,17 +8,21 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using LABPOWER_APC.Utilities;
 
 namespace LABPOWER_APC.Controller
 {
     public class UPSPortManager
     {
+        private const string userSettingFile = "userSetting.xml";
+
         public bool PortActive { get; private set; }
 
         private System.Timers.Timer heartbeatTimer;
 
         public UPSPortManager(UPSSettings settings)
         {
+            
             _currentSerialSettings = settings;
             _currentSerialSettings.PropertyChanged += _currentSerialSettings_PropertyChanged;
             FindUPSSerialPort();
@@ -66,7 +70,7 @@ namespace LABPOWER_APC.Controller
 
         void _currentSerialSettings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            UPSSettings.Serialize(_currentSerialSettings);
+            XmlHelper.Serialize(_currentSerialSettings, userSettingFile);
         }
 
 
@@ -211,7 +215,7 @@ namespace LABPOWER_APC.Controller
                                 PortActive = true;
                                 _currentSerialSettings.PortName = portName;
                                 //save the settings once we've found the right port
-                                UPSSettings.Serialize(_currentSerialSettings);
+                                XmlHelper.Serialize(_currentSerialSettings, userSettingFile);
                                 break;
                             }
                         }

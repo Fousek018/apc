@@ -6,93 +6,256 @@
         xmlns:local="clr-namespace:LABPOWER_APC.View"
         xmlns:View="clr-namespace:LABPOWER_APC.View"
         xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:Model="clr-namespace:LABPOWER_APC.Model"
+        xmlns:behaviors="clr-namespace:LABPOWER_APC.Utilities"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="UPSVIEW" Height="800" Width="400">
+        Title="UPSVIEW" Height="800" Width="1200 ">
 
-   
 
-    <Grid>
+
+    <Grid Margin="40">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1.5*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+
         </Grid.RowDefinitions>
-        <Label Content="APC UPS CONTROLLER"  Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2">
-            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Port" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="Port" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Content="{Binding Port}"/>
+
+        <!--Header-->
+        <Grid Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"  HorizontalAlignment="Center" >
+            <Label Content="{Binding CS}"/>
+        </Grid>
+        <Canvas Background="Transparent" x:Name="ConnectionCanvas" Grid.Row="1" Grid.RowSpan="2" >
+
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="MainStack">
+                <TextBlock x:Name="MainPcTextBlock" 
+                       Text="{Binding MainPc, FallbackValue= Fus }" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Margin="10" HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Vertical" Width="150">
+                                        <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Button Content="Remove" Command="{Binding DataContext.RemoveChosenDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" Padding="2"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
+            </StackPanel>
 
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Battery Status" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="B_status" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Content="{Binding B_status}"/>
-                </StackPanel>
+        </Canvas>
+        <Grid Grid.Row="3">
+            <ListView ItemsSource="{Binding Devices}"
+                      SelectionMode="Multiple" MaxHeight="150">
 
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Model" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="Model" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Content="{Binding Model}"/>
-                </StackPanel>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
 
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="OutputVolatge" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="OutputVolatge" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Content="{Binding OutputVoltage}"/>
-                </StackPanel>
+                <i:Interaction.Behaviors>
+                    <behaviors:SelectedItemsBehavior SelectedItems="{Binding SelectedDevices}" />
+                </i:Interaction.Behaviors>
 
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Tries" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="Tries" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Content="{Binding Tries}"/>
-                </StackPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel  HorizontalAlignment="Center" Width="130" Margin="5">
+                            <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding IPAddress}"  HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding MACAddress}"  HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="PowerType" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="PowerType" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Content="{Binding PowerType}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Shutdown Time" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="S_time" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Content="{Binding ShutdownDelay}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Alarm Setting" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="A_setting" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Content="{Binding AlarmDelay}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Time left to resuply power" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Label x:Name="Time_to_resuply" Width="70" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Content="{Binding ShutdownTimeLeft}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    
-                    <ComboBox ItemsSource="{Binding GracefulDelayValues}"
-                              SelectedItem="{Binding SelectedGracefulDelay, Mode=TwoWay}" Text="{Binding ShutdownDelay}"/>
-
-                    <ComboBox ItemsSource="{Binding AlarmValues}"
-                              SelectedItem="{Binding SelectedAlarmDelay, Mode=TwoWay}" Text="{Binding AlarmDelay}"/>
-                    <Button Content="Save" Command="{Binding SerializeSettingsCommand}"/>
-                </StackPanel>
-
+        <!--Button for search-->
+        <Grid Grid.Row="4" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 50">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Search" Padding="10" Command="{Binding GetIpCommand}" Margin="10"/>
+                <Button Content="Add" Padding="10" Command="{Binding AddSelectedDevicesCommand}" Margin="10"/>
             </StackPanel>
         </Grid>
-            
+
+        <!--Right side-->
+
+        <Grid Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+            <Label Content="UPS"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="4" Margin="15">
+            <TabControl Grid.Column="1" Grid.Row="1">
+                <TabItem Header="Monitoring">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.ColumnSpan="2" Margin="0" Grid.Row="0">
+                            <Label x:Name="Header" Content="APC monitoring" 
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Grid>
+                        <!--Moniored property-->
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="20 0 0 0" Grid.RowSpan="2">
+                            <StackPanel Margin="20 50  15 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Model"/>
+                                    <Label Content="{Binding Model}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Port"/>
+                                    <Label Content="{Binding Port}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Power Type"/>
+                                    <Label Content="{Binding PowerType}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Battery Level"/>
+                                    <Label Content="{Binding BatteryLevel}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Input Voltage"/>
+                                    <Label Content="{Binding InputVoltage}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Output Voltage"/>
+                                    <Label Content="{Binding OutputVoltage}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" VerticalAlignment="Bottom">
+                            <!-- Output Voltage Chart -->
+                            <lvc:CartesianChart Series="{Binding OutputVoltageSeries}" Height="150">
+                                <lvc:CartesianChart.AxisX>
+                                    <lvc:Axis Title="Time" FontSize="13" Labels="{Binding TimeLabels}"/>
+                                </lvc:CartesianChart.AxisX>
+                                <lvc:CartesianChart.AxisY>
+                                    <lvc:Axis Title="Voltage" FontSize="13" 
+                                                  MinValue="0" 
+                                                  MaxValue="250" LabelFormatter="{Binding VoltageFormatter}"/>
+                                </lvc:CartesianChart.AxisY>
+                            </lvc:CartesianChart>
+                        </Grid>
+
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Settings">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+                            <Label x:Name="UPS_settings" Content="APC Settings"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="20 15 0 0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid HorizontalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Time before shutdowny" VerticalAlignment="Center" Grid.Column="0"/>
+                                        <ComboBox VerticalAlignment="Top" Grid.Column="1"
+                                                   Text="{Binding CS}"
+                                                   ItemsSource="{Binding ShutdownTimerOptions}" 
+                                                   SelectedItem="{Binding SelectedShutdownTimer}" 
+                                                   
+                                                   DisplayMemberPath="Description"
+                                                   
+                                                   Margin="10" SelectedIndex="0" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid HorizontalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                    <Label Content="Shutdown delay" VerticalAlignment="Center" Grid.Column="0"/>
+                                    <ComboBox x:Name="GracefulDelayComboBox" VerticalAlignment="Top" Grid.Column="1"
+                                              Text="{Binding ShutdownDelay}"
+                                              ItemsSource="{Binding GracefulDelayOptions}" 
+                                              SelectedItem="{Binding SelectedGracefulDelay}" 
+                                              DisplayMemberPath="Description"
+                                              Margin="10" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                        <Label Content="Alarm settings" VerticalAlignment="Center" Grid.Column="0"/>
+                                        <ComboBox x:Name="AlarmDelayCombobox" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1"
+                                                      Text="{Binding AlarmDelay}"
+                                                      ItemsSource="{Binding AlarmlDelayOptions}" 
+                                                      SelectedItem="{Binding SelectedAlarmDelay}"
+                                                      
+                                                      DisplayMemberPath="Description"
+                                                      Margin="10"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Separator HorizontalAlignment="Stretch" Margin="0 10" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Baud Rate"/>
+                                    <Label Content="{Binding Baudrate}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Parity"/>
+                                    <Label Content="{Binding Parity}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="DataBits"/>
+                                    <Label Content="{Binding DataBits}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="StopBits"/>
+                                    <Label Content="{Binding StopBits}"/>
+                                </StackPanel>
+
+                            </StackPanel>
+                            
+                        </Grid>
+                        <Button Content="Save" Command="{Binding SaveGracefulDelayCommand}" 
+                                Margin="10" VerticalAlignment="Bottom" Grid.Row="2" Grid.ColumnSpan="2"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
     </Grid>
+
 </Window>
+   
