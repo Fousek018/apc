@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using LABPOWER_APC.Utilities;
 using System.Windows.Documents;
+using CommunityToolkit.Mvvm.Input;
 
 namespace LABPOWER_APC.VM
 {
@@ -24,13 +25,20 @@ namespace LABPOWER_APC.VM
         public string? _RemoteName;
 
         [ObservableProperty]
-        public string _SelectedTask;
+        public string? _SelectedTask;
 
         [ObservableProperty]
-        public List<string> _AvailableTasks;
+        public List<string>? _AvailableTasks;
 
-        public remotePCVM(ChosenNetworkDevice chosedDevice)
+        [ObservableProperty]
+        public int? _TimeOfExecute;
+
+        public ChosenNetworkDevice chosedDevice;
+
+        public remotePCVM(ChosenNetworkDevice ChosedDevice)
         {
+            chosedDevice = ChosedDevice;
+
             IPAddress = chosedDevice.IPAddress; // Assign IPAddress from chosedDevice to _IPAddress
             RemoteName = chosedDevice.HostName; // Assign HostName from chosedDevice to _RemoteName
 
@@ -38,6 +46,15 @@ namespace LABPOWER_APC.VM
             _AvailableTasks = XmlHelper.Deserialize<List<string>>("fieldTaks.xml");
             
 
+        }
+        [RelayCommand]
+        private void SaveSettings()
+        {
+            chosedDevice.nameOfTaks = SelectedTask; // Assign _SelectedTask to nameOfTaks in chosedDevice
+            chosedDevice.timeOfexecute = TimeOfExecute; // Assign _TimeOfExecute to timeOfExecute in chosedDevice
+
+            // Serialize _AvailableTasks to XML
+            XmlHelper.UpdateFile(chosedDevice, "connectedDevices.xml");
         }
     }
 }

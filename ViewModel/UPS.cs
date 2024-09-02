@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using FluentValidation;
 using LABPOWER_APC.Controller;
 using LABPOWER_APC.Model;
 using LABPOWER_APC.Utilities;
@@ -120,11 +122,16 @@ namespace LABPOWER_APC.ViewModel
 
 
         public SeriesCollection OutputVoltageSeries { get; set; }
+        public SeriesCollection BatteryLevelSeries { get; set; }
         public ObservableCollection<string> TimeLabels { get; set; }
         public Func<double, string> VoltageFormatter { get; set; }
-
+        public Func<int, double> BatteryCapacity { get; set; }
+        public logger _logger = Ioc.Default.GetService<logger>();
+        public UPSValidator validator = new UPSValidator();
         public UPS()
         {
+      
+
             SaveDirectory = System.IO.Path.Combine(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Data"));
             SelectedDevices = new ObservableCollection<NetworkDevice>();
 
@@ -168,14 +175,29 @@ namespace LABPOWER_APC.ViewModel
             OutputVoltageSeries = new SeriesCollection
                 {
             new LineSeries
-            {
-                Title = "Output Voltage",
-                Values = new ChartValues<double>()
-            }
+                 {
+                    Title = "Output Voltage",
+                    Values = new ChartValues<double>()
+                },
+            new LineSeries
+               {
+                   Title = "New Output Voltage",
+                   Values = new ChartValues<double>()
+               }
                 };
+
+            BatteryLevelSeries = new SeriesCollection
+                {
+                new LineSeries
+                {
+                    Title = "Battery Level",
+                    Values = new ChartValues<double>()
+                }
+            };
 
             TimeLabels = new ObservableCollection<string>();
             VoltageFormatter = value => value.ToString("N");
+            BatteryCapacity = value => value;
 
             // Timer to update data every 10 seconds
             _timer = new DispatcherTimer
@@ -188,7 +210,10 @@ namespace LABPOWER_APC.ViewModel
 
             // Load saved devices
             Devices = new ObservableCollection<NetworkDevice>();
-            ChosenNetworkDevices = new ObservableCollection<ChosenNetworkDevice>(XmlHelper.Deserialize<List<ChosenNetworkDevice>>(conDevFile));
+            var deserializedDevices = XmlHelper.Deserialize<List<ChosenNetworkDevice>>(conDevFile);
+            ChosenNetworkDevices = deserializedDevices != null ? 
+                new ObservableCollection<ChosenNetworkDevice>(deserializedDevices) : new ObservableCollection<ChosenNetworkDevice>();
+            XmlHelper.Serialize(ChosenNetworkDevices.ToList(), conDevFile);
 
             // Get the name of the main computer
             computerName = Dns.GetHostName();
@@ -197,7 +222,7 @@ namespace LABPOWER_APC.ViewModel
             //Shutdowning upc after hibernation or sleep mode
             //SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
-            CS = UPSStatus.GetEnumDescription((UPSSettings.ShutdownEnum)Settings.ShutdownTimeLeft);
+
 
         }
 
@@ -215,7 +240,7 @@ namespace LABPOWER_APC.ViewModel
         {
             UpdateChart();
         }
-
+      
         private void UPS_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(InputVoltage))
@@ -223,21 +248,26 @@ namespace LABPOWER_APC.ViewModel
                 UpdateChart();
             }
         }
-        private void UpdateChart()
+        public void UpdateChart()
         {
-            string cleanedInput = InputVoltage.Trim();
-            // Simulate data update
-            if (double.TryParse(cleanedInput, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double voltage))
-            {
-                OutputVoltageSeries[0].Values.Add(voltage);
-                TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
 
-                // Keep only the last 10 values
-                if (OutputVoltageSeries[0].Values.Count > 10)
-                {
-                    OutputVoltageSeries[0].Values.RemoveAt(0);
-                    TimeLabels.RemoveAt(0);
-                }
+            string cleanedInput = (InputVoltage?.Trim() ?? string.Empty).Replace(".",",");
+            string cleanedInpu2 = (OutputVoltage?.Trim() ?? string.Empty).Replace(".", ",");
+            string cleanedInpu3 = (BatteryLevel?.Trim() ?? string.Empty).Replace(".", ",");
+            // Simulate data update
+
+            OutputVoltageSeries[0].Values.Add(double.Parse(cleanedInput));
+            OutputVoltageSeries[1].Values.Add(double.Parse(cleanedInpu2));
+            BatteryLevelSeries[0].Values.Add(double.Parse(cleanedInpu3));
+            TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
+
+            // Keep only the last 10 values
+            if (OutputVoltageSeries[0].Values.Count > 10 || OutputVoltageSeries[1].Values.Count > 10 || BatteryLevelSeries[0].Values.Count > 10)
+            {
+                OutputVoltageSeries[0].Values.RemoveAt(0);
+                OutputVoltageSeries[1].Values.RemoveAt(0);
+                BatteryLevelSeries[0].Values.RemoveAt(0);
+                TimeLabels.RemoveAt(0);
             }
         }
 
@@ -544,13 +574,10 @@ namespace LABPOWER_APC.ViewModel
         {
             if (device != null)
             {
-                // Například: otevřete nové okno s informacemi o zařízení
                 var viewModel = new remotePCVM(device);
                 var window = new remotePCView { DataContext = viewModel };
                 window.Show();
             }
         }
     }
-
-
 }

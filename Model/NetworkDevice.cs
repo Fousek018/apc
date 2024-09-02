@@ -21,17 +21,8 @@ namespace LABPOWER_APC.Model
     {
         public string? IPAddress { get; set; }
         public string? HostName { get; set; }
-        public string? nameOfTaks { get; set; }
-        public int? timeOfexecute { get; set; }
-        public ChosenNetworkDevice()
-        {
-            
-        }
-        
-    }
-    public class LineInfo
-    {
-        public Point StartPoint { get; set; }
-        public Point EndPoint { get; set; }
+        public string? nameOfTaks { get; set; } = "None";
+        public int? timeOfexecute { get; set; } = 0;
+
     }
 }

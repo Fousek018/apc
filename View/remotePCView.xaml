@@ -15,8 +15,6 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Grid Grid.ColumnSpan="2">
@@ -39,9 +37,13 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Time to execute"/>
-                    <TextBox Text="Set time to execute" VerticalAlignment="Center" Opacity="0.5" FontSize="10"/>
+                    <TextBox Text="{Binding TimeOfExecute, TargetNullValue='Set time to execute'}" 
+                             VerticalAlignment="Center" 
+                             FontSize="10" />
                 </StackPanel>
             </StackPanel>
+            <Button VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                    Grid.Row="2" Content="Save" Command="{Binding SaveSettingsCommand}"/>
         </Grid>
         
     </Grid>

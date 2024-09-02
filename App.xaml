@@ -4,13 +4,13 @@
              xmlns:local="clr-namespace:LABPOWER_APC"
              xmlns:View="clr-namespace:LABPOWER_APC.View"
              xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
-             StartupUri="View/UPSVIEW.xaml">
+             ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
 
         <DataTemplate x:Name="UPSVIEW_Templates" DataType="{x:Type ViewModel:UPS}">
             <View:UPSVIEW/>
         </DataTemplate>
-        
-        
+
+
     </Application.Resources>
 </Application>
