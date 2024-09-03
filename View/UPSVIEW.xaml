@@ -13,8 +13,14 @@
         mc:Ignorable="d"
         Title="UPSVIEW" Height="800" Width="1200 ">
 
-
-
+    <Window.Resources>
+        <Storyboard x:Key="FadeInOutAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1" To="0.5" Duration="0:0:0.5" AutoReverse="True" RepeatBehavior="Forever"/>
+        </Storyboard>
+    </Window.Resources>
+    
+    
     <Grid Margin="40">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.5*" />
@@ -31,41 +37,50 @@
 
         <!--Header-->
 
-        <Canvas Background="Transparent" x:Name="ConnectionCanvas" Grid.Row="0" Grid.RowSpan="2" >
 
-            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="MainStack">
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel x:Name="MainStack">
+
                 <TextBlock x:Name="MainPcTextBlock" 
-                       Text="{Binding MainPc}" 
-                       HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <StackPanel Grid.Column="2" Orientation="Vertical">
-                    <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="4" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" Margin="10" HorizontalAlignment="Center">
-                                    <StackPanel Orientation="Vertical" Width="150">
-                                        <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                    <Button Content="Remove" 
+                       Text="{Binding MainPc,FallbackValue=MainPC}" Grid.Row="0" HorizontalAlignment="Center"/>
+
+                <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}" Grid.Row="1">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid  Columns="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="10" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Vertical" Width="150">
+                                <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <Button Content="Remove" 
                                             Command="{Binding DataContext.RemoveChosenDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" Padding="2"/>
-                                    <Button Content="Settings" 
+                            <Button Content="Settings" 
                                             Command="{Binding DataContext.PcSettingsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" Padding="2"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        
+        </StackPanel>
+        </Grid>
 
-        </Canvas>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" x:Name="listofsearch" Visibility="Hidden">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Stop" Padding="10" Command="{Binding StopGetIpCommand}" Margin="10"/>
+                    <Button Content="Add" Padding="10" Command="{Binding AddSelectedDevicesCommand}" Margin="10" Width="50"/>
+                </StackPanel>
             <ListView ItemsSource="{Binding Devices}"
                       SelectionMode="Multiple" MaxHeight="150">
 
@@ -89,13 +104,21 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            </StackPanel>
         </Grid>
 
         <!--Button for search-->
-        <Grid Grid.Row="4" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 50">
+        <Grid Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-                <Button Content="Search" Padding="10" Command="{Binding GetIpCommand}" Margin="10"/>
-                <Button Content="Add" Padding="10" Command="{Binding AddSelectedDevicesCommand}" Margin="10"/>
+                <Border CornerRadius="60"  x:Name="SearchButtonBorder"  BorderBrush="#FF006CFD" BorderThickness="3" Width="90" Height="90" >
+                    <Button Content="SEARCH" Padding="10" Click="SearchButton_Click" x:Name="SearchButton"
+                            Command="{Binding GetIpCommand}" 
+                            Margin="10" Background="Transparent" BorderBrush="{x:Null}" FocusVisualStyle="{x:Null}" Foreground="#FF006CFD" >
+                        <Button.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Button.RenderTransform>
+                    </Button>
+                </Border>
             </StackPanel>
         </Grid>
 
@@ -111,8 +134,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="0.5*" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="2*" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
@@ -133,7 +156,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Power Type"/>
-                                    <Label Content="{Binding PowerType}"/>
+                                    <Label Content="{Binding PowerType2}"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Battery Level"/>
@@ -150,18 +173,17 @@
                             </StackPanel>
                         </Grid>
                         <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" VerticalAlignment="Bottom">
-                            <lvc:CartesianChart Name="candlestickChart">
-                                <lvc:CartesianChart.Series>
-                                    <lvc:OhlcSeries Values="{Binding BatteryCapacity}"/>
-                                </lvc:CartesianChart.Series>
+                            <!-- Output Voltage Chart -->
+                            <lvc:CartesianChart Series="{Binding BatteryLevelSeries}" Height="150">
                                 <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Title="Time" Labels="{Binding TimeLabels}"/>
+                                    <lvc:Axis Title="Time" FontSize="13" Labels="{Binding TimeLabels}"/>
                                 </lvc:CartesianChart.AxisX>
                                 <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis Title="Hodnota"/>
+                                    <lvc:Axis  Title="Battery" FontSize="13" 
+                                                MinValue="0" 
+                                                MaxValue="100" LabelFormatter="{Binding BatteryCapacity}"/>
                                 </lvc:CartesianChart.AxisY>
                             </lvc:CartesianChart>
-
                         </Grid>
                         <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="0" VerticalAlignment="Bottom">
                             <!-- Output Voltage Chart -->

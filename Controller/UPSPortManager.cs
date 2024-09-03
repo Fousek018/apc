@@ -9,14 +9,16 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using LABPOWER_APC.Utilities;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace LABPOWER_APC.Controller
 {
-    public class UPSPortManager
+    public partial class UPSPortManager : ObservableObject
     {
         private const string userSettingFile = "userSetting.xml";
 
-        public bool PortActive { get; private set; }
+        [ObservableProperty]
+        public bool _PortActive;
 
         private System.Timers.Timer heartbeatTimer;
 
@@ -123,6 +125,8 @@ namespace LABPOWER_APC.Controller
 
                 try
                 {
+
+                   
                     _serialPort.DataReceived -= _serialPort_DataReceived;
                     _serialPort.Write(write);
                     System.Threading.Thread.Sleep(delay);
@@ -134,6 +138,8 @@ namespace LABPOWER_APC.Controller
                         response = System.Text.Encoding.Default.GetString(data).Replace("\r\n", "");
                     }
                     _serialPort.DataReceived += _serialPort_DataReceived;
+                    
+
                 }
                 catch (Exception)
                 {

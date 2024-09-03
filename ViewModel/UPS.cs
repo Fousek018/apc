@@ -41,10 +41,7 @@ namespace LABPOWER_APC.ViewModel
         int _ShutdownTimeLeft;
 
         [ObservableProperty]
-        private string _CS = "ZK";
-
-        [ObservableProperty]
-        private PowerTypeEnum _PowerType;
+        private string _PowerType2;
 
         [ObservableProperty]
         private string _BatteryVoltage;
@@ -64,9 +61,6 @@ namespace LABPOWER_APC.ViewModel
         //Settings properties
         [ObservableProperty]
         private string _ShutdownDelay;
-
-        [ObservableProperty]
-        private string _AlarmDelay;
 
         [ObservableProperty]
         private string _Port;
@@ -137,7 +131,6 @@ namespace LABPOWER_APC.ViewModel
 
             //Inicialization of the settings
             Settings = XmlHelper.Deserialize<UPSSettings>(userSettingFile) ?? new UPSSettings();
-            CS = Settings.ShutdownTimeLeft.ToString() + " second";
 
             //Inicialization of the port manager
             PortManager = new UPSPortManager(Settings);
@@ -146,13 +139,14 @@ namespace LABPOWER_APC.ViewModel
             Status = new UPSStatus(PortManager);
             //Subscribing to the property changes of the status class
             Status.PropertyChanged += Status_PropertyChanged;
-
+            PortManager.PropertyChanged += PortManager_PropertyChanged;
 
             //Settings Propertyupdate
             Settings_Propertyupdate();
 
             //Entering to the smart Mode, need to do that before anything else
-            PortManager.WriteAndWaitForResponse("Y", 100);
+            
+            //PortManager.WriteAndWaitForResponse("Y", 100);
 
             GracefulDelayOptions = Enum.GetValues(typeof(UPSStatus.GracefulDelay))
                                    .Cast<UPSStatus.GracefulDelay>()
@@ -208,6 +202,7 @@ namespace LABPOWER_APC.ViewModel
             _timer.Start();
 
 
+
             // Load saved devices
             Devices = new ObservableCollection<NetworkDevice>();
             var deserializedDevices = XmlHelper.Deserialize<List<ChosenNetworkDevice>>(conDevFile);
@@ -224,6 +219,15 @@ namespace LABPOWER_APC.ViewModel
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
 
 
+        }
+
+        private void PortManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PortManager.PortActive))
+            {
+                PortManager.WriteAndWaitForResponse("Y", 100);
+                
+            }
         }
 
         private void Settings_Propertyupdate()
@@ -256,10 +260,10 @@ namespace LABPOWER_APC.ViewModel
             string cleanedInpu3 = (BatteryLevel?.Trim() ?? string.Empty).Replace(".", ",");
             // Simulate data update
 
-            OutputVoltageSeries[0].Values.Add(double.Parse(cleanedInput));
-            OutputVoltageSeries[1].Values.Add(double.Parse(cleanedInpu2));
-            BatteryLevelSeries[0].Values.Add(double.Parse(cleanedInpu3));
-            TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
+                OutputVoltageSeries[0].Values.Add(double.Parse(cleanedInput));
+                OutputVoltageSeries[1].Values.Add(double.Parse(cleanedInpu2));
+                BatteryLevelSeries[0].Values.Add(double.Parse(cleanedInpu3));
+                TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
 
             // Keep only the last 10 values
             if (OutputVoltageSeries[0].Values.Count > 10 || OutputVoltageSeries[1].Values.Count > 10 || BatteryLevelSeries[0].Values.Count > 10)
@@ -295,12 +299,12 @@ namespace LABPOWER_APC.ViewModel
         {
 
             Port = Settings.PortName;
+            string powerType = Status.PowerType.ToString();
+
+            PowerType2 = powerType;
 
             switch (e.PropertyName)
             {
-                case nameof(UPSStatus.PowerType):
-                    PowerType = Status.PowerType;
-                    break;
                 case nameof(UPSStatus.BatteryVoltage):
                     BatteryVoltage = Status.BatteryVoltage;
                     break;
@@ -319,14 +323,11 @@ namespace LABPOWER_APC.ViewModel
                 case nameof(UPSStatus.ShutdownDelay):
                     ShutdownDelay = Status.ShutdownDelay;
                     break;
-                case nameof(UPSStatus.AlarmDelay):
-                    AlarmDelay = Status.AlarmDelay;
-                    break;
             }
 
-            if (e.PropertyName.Equals("PowerType"))
+            if (PowerType2.Equals("Battery"))
             {
-                if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
+                 if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
                 {
                     computerShutdownTimer = new Timer();
                     computerShutdownTimer.Interval = 1000;
@@ -384,7 +385,7 @@ namespace LABPOWER_APC.ViewModel
             //Tries = 1;
         }
 
-        /// <summary>
+        /// <summary>-----
         /// turns on the UPS if already off. Rarely, if ever, used, since the computer will be plugged into the UPS
         /// </summary>
         public void TurnOnUPS()
@@ -564,7 +565,6 @@ namespace LABPOWER_APC.ViewModel
             {
                 Settings.ShutdownTimeLeft = (int)SelectedShutdownTimer.Value;
                 XmlHelper.Serialize(Settings, userSettingFile);
-                CS = UPSStatus.GetEnumDescription((UPSSettings.ShutdownEnum)Settings.ShutdownTimeLeft);
 
             }
            
