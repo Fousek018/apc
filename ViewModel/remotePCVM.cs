@@ -44,7 +44,7 @@ namespace LABPOWER_APC.VM
 
             // Deserialize field tasks from XML
             _AvailableTasks = XmlHelper.Deserialize<List<string>>("fieldTaks.xml");
-            
+            SelectedTask = chosedDevice.nameOfTaks;
 
         }
         [RelayCommand]

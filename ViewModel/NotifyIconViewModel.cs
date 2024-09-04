@@ -27,7 +27,7 @@ namespace LABPOWER_APC.ViewModel
         }
         private void HomeVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(UPS.PowerType2))
+            if (e.PropertyName == nameof(UPS.Power))
             {
                 ShowNotification("Power supply change ", "shutdown sequence triggered");
             }

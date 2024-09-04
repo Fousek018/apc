@@ -19,6 +19,7 @@ using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Timers;
+using System.Windows.Forms;
 using System.Windows.Threading;
 using static LABPOWER_APC.Model.UPSStatus;
 using Timer = System.Timers.Timer;
@@ -39,10 +40,7 @@ namespace LABPOWER_APC.ViewModel
         private string _MainPc;
 
         int _ShutdownTimeLeft;
-
-        [ObservableProperty]
-        private string _PowerType2;
-
+ 
         [ObservableProperty]
         private string _BatteryVoltage;
 
@@ -77,7 +75,8 @@ namespace LABPOWER_APC.ViewModel
         [ObservableProperty]
         public StopBits _StopBits;
 
-
+        [ObservableProperty]
+        private string _Power;
 
         [ObservableProperty]
         private EnumHelper<UPSStatus.GracefulDelay> _SelectedGracefulDelay;
@@ -193,21 +192,16 @@ namespace LABPOWER_APC.ViewModel
             VoltageFormatter = value => value.ToString("N");
             BatteryCapacity = value => value;
 
-            // Timer to update data every 10 seconds
             _timer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(10)
             };
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-
-
 
             // Load saved devices
             Devices = new ObservableCollection<NetworkDevice>();
             var deserializedDevices = XmlHelper.Deserialize<List<ChosenNetworkDevice>>(conDevFile);
             ChosenNetworkDevices = deserializedDevices != null ? 
-                new ObservableCollection<ChosenNetworkDevice>(deserializedDevices) : new ObservableCollection<ChosenNetworkDevice>();
+            new ObservableCollection<ChosenNetworkDevice>(deserializedDevices) : new ObservableCollection<ChosenNetworkDevice>();
             XmlHelper.Serialize(ChosenNetworkDevices.ToList(), conDevFile);
 
             // Get the name of the main computer
@@ -226,7 +220,12 @@ namespace LABPOWER_APC.ViewModel
             if (e.PropertyName == nameof(PortManager.PortActive))
             {
                 PortManager.WriteAndWaitForResponse("Y", 100);
-                
+                // Timer to update data every 10 seconds
+
+                _timer.Tick += Timer_Tick;
+                _timer.Start();
+
+
             }
         }
 
@@ -300,8 +299,7 @@ namespace LABPOWER_APC.ViewModel
 
             Port = Settings.PortName;
             string powerType = Status.PowerType.ToString();
-
-            PowerType2 = powerType;
+            Power = powerType;
 
             switch (e.PropertyName)
             {
@@ -325,7 +323,7 @@ namespace LABPOWER_APC.ViewModel
                     break;
             }
 
-            if (PowerType2.Equals("Battery"))
+            if (Power.Equals("Battery"))
             {
                  if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
                 {
@@ -348,10 +346,10 @@ namespace LABPOWER_APC.ViewModel
         void computerShutdownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ShutdownTimeLeft -= 1;
-            if (Settings.ShutdownTimeLeft <= 0)
+            if (_ShutdownTimeLeft <= 0)
             {
                 computerShutdownTimer.Stop();
-
+                chosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
                 ShutdownGracefully();
                 //Process.Start("shutdown", "/s /t 0");
             }
@@ -362,6 +360,7 @@ namespace LABPOWER_APC.ViewModel
         /// </summary>
         public void ShutdownGracefully()
         {
+            
             _ShutdownTimeLeft = (Settings.ShutdownTimeLeft = 20);
 
             PortManager.WriteSerial("Y");
@@ -572,12 +571,24 @@ namespace LABPOWER_APC.ViewModel
         [RelayCommand]
         public void PcSettings(ChosenNetworkDevice device)
         {
+
             if (device != null)
             {
                 var viewModel = new remotePCVM(device);
                 var window = new remotePCView { DataContext = viewModel };
                 window.Show();
+                window.Closed += (sender, e) => CloseWindow();
             }
+
+
+            
+
+        }
+
+        private void CloseWindow()
+        {
+            chosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
+
         }
     }
 }

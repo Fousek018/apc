@@ -18,29 +18,45 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.ColumnSpan="2">
-            <Label Content="Remote PC settup" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <StackPanel>
+                <Label Content="Remote PC settup" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Label Content="{Binding RemoteName}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="2">
             <StackPanel>
-                <Label Content="{Binding RemoteName}" HorizontalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <Label Content="IP Address" VerticalAlignment="Center"/>
-                    <Label Content="{Binding IPAddress}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Task to kill"/>
-                    <ComboBox x:Name="TaskEnum"
+                    <Label Content="{Binding IPAddress}" Grid.Column="1"  HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="Task to kill" Grid.Column="0"/>
+                    <ComboBox x:Name="TaskEnum" Grid.Column="1"
                               ItemsSource="{Binding AvailableTasks}" 
                               SelectedItem="{Binding SelectedTask}" 
-                              SelectedIndex="0" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                              />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <Label Content="Time to execute"/>
-                    <TextBox Text="{Binding TimeOfExecute, TargetNullValue='Set time to execute'}" 
+                    <TextBox Text="{Binding TimeOfExecute, TargetNullValue='0'}"  Grid.Column="1" Width="30" 
+                             HorizontalAlignment="Right"
                              VerticalAlignment="Center" 
-                             FontSize="10" />
-                </StackPanel>
+                             />
+                </Grid>
             </StackPanel>
             <Button VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
                     Grid.Row="2" Content="Save" Command="{Binding SaveSettingsCommand}"/>
