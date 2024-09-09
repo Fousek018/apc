@@ -31,32 +31,6 @@ namespace LABPOWER_APC.View
            
 
         }
-
-        private void ShutdownTimerCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-        private async void SearchButton_Click(object sender, RoutedEventArgs e)
-        {
-            Border searchButtonBorder = (Border)FindName("SearchButtonBorder");
-            Grid searchgrid = (Grid)FindName("listofsearch");
-
-            searchgrid.Visibility = Visibility.Visible;
-
-            // Start the animation
-            Storyboard fadeInOutAnimation = (Storyboard)FindResource("FadeInOutAnimation");
-            fadeInOutAnimation.Begin(searchButtonBorder);
-
-            // Simulate a long-running operation
-            await Task.Run(() =>
-            {
-                // Your long-running operation here
-                System.Threading.Thread.Sleep(5000); // Simulate a 5-second operation
-            });
-
-            // Stop the animation
-            fadeInOutAnimation.Stop(searchButtonBorder);
-        }
     
     }
 }

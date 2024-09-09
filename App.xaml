@@ -6,11 +6,16 @@
              xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
-
+        <ResourceDictionary>
         <DataTemplate x:Name="UPSVIEW_Templates" DataType="{x:Type ViewModel:UPS}">
             <View:UPSVIEW/>
         </DataTemplate>
 
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Animations.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
 
     </Application.Resources>
 </Application>

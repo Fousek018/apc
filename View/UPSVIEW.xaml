@@ -10,81 +10,89 @@
         xmlns:Model="clr-namespace:LABPOWER_APC.Model"
         xmlns:behaviors="clr-namespace:LABPOWER_APC.Utilities"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:xf="clr-namespace:XamlFlair;assembly=XamlFlair.WPF"
+        xmlns:xfc="clr-namespace:XamlFlair.Controls;assembly=XamlFlair.WPF"
         mc:Ignorable="d"
         Title="UPSVIEW" Height="800" Width="1200 ">
 
-    <Window.Resources>
-        <Storyboard x:Key="FadeInOutAnimation">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             From="1" To="0.5" Duration="0:0:0.5" AutoReverse="True" RepeatBehavior="Forever"/>
-        </Storyboard>
-    </Window.Resources>
-    
-    
     <Grid Margin="40">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.5*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-
-        </Grid.RowDefinitions>
 
         <!--Header-->
 
+        <Grid Grid.Column="0">
 
-        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" HorizontalAlignment="Center" >
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.5*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="2*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel x:Name="MainStack">
 
+            <Grid Grid.Row="0">
                 <TextBlock x:Name="MainPcTextBlock" 
-                       Text="{Binding MainPc,FallbackValue=MainPC}" Grid.Row="0" HorizontalAlignment="Center"/>
+                       Text="{Binding MainPc,FallbackValue=MainPC}" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
 
-                <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}" Grid.Row="1">
+            </Grid>
+        
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1">
+
+            <ItemsControl ItemsSource="{Binding ChosenNetworkDevices}">
                     
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid  Columns="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <UniformGrid  Columns="3" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                     
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="10" HorizontalAlignment="Center">
-                            <StackPanel Orientation="Vertical" Width="150">
-                                <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            <Button Content="Remove" 
+                            <Grid Margin="10" Width="150" xf:Animations.Primary="{StaticResource FadeIn}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.5*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="0.5*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="3" />
+                                <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="3"/>
+                                <TextBlock Text="{Binding nameOfTaks}" HorizontalAlignment="Center" Grid.Row="3" Grid.ColumnSpan="3"/>
+                                <TextBlock Text="{Binding timeOfexecute  }" HorizontalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="3"/>
+
+                                <Button Content="R" Grid.Row="0" Grid.Column="2" Width="30" HorizontalAlignment="Right"
                                             Command="{Binding DataContext.RemoveChosenDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" Padding="2"/>
-                            <Button Content="Settings" 
+                                <Button Content="Settings" Grid.Row="5" Grid.Column="1" Margin="0 10 0 0"
                                             Command="{Binding DataContext.PcSettingsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" Padding="2"/>
-                        </StackPanel>
-                    </DataTemplate>
+                            </Grid>
+                        </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        
-        </StackPanel>
+
         </Grid>
 
-        <Grid Grid.Row="3" x:Name="listofsearch" Visibility="Hidden">
+        <Grid x:Name="listofsearch" Grid.Row="2">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Stop" Padding="10" Command="{Binding StopGetIpCommand}" Margin="10"/>
                     <Button Content="Add" Padding="10" Command="{Binding AddSelectedDevicesCommand}" Margin="10" Width="50"/>
                 </StackPanel>
-            <ListView ItemsSource="{Binding Devices}"
-                      SelectionMode="Multiple" MaxHeight="150">
+                    <xfc:AnimatedListView ItemsSource="{Binding Devices}"
+                      SelectionMode="Multiple" MaxHeight="200">
 
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -98,36 +106,39 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel  HorizontalAlignment="Center" Width="130" Margin="5">
+                        <StackPanel  HorizontalAlignment="Center" Width="130" Margin="5" x:Name="PosDev"
+                                     xf:Animations.Primary="{xf:Animate BasedOn={StaticResource Expand}, Event=MouseEnter}"
+                                     xf:Animations.Secondary="{xf:Animate BasedOn={StaticResource Contract}, Event=MouseLeave}">
                             <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center" TextWrapping="Wrap"/>
                             <TextBlock Text="{Binding IPAddress}"  HorizontalAlignment="Center"/>
                             <TextBlock Text="{Binding MACAddress}"  HorizontalAlignment="Center"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-            </ListView>
+            </xfc:AnimatedListView>
             </StackPanel>
         </Grid>
 
         <!--Button for search-->
-        <Grid Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <StackPanel Orientation="Horizontal">
-                <Border CornerRadius="60"  x:Name="SearchButtonBorder"  BorderBrush="#FF006CFD" BorderThickness="3" Width="90" Height="90" >
-                    <Button Content="SEARCH" Padding="10" Click="SearchButton_Click" x:Name="SearchButton"
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3">
+            <StackPanel Orientation="Horizontal" >
+                    <Border CornerRadius="60"  x:Name="SearchButtonBorder"  BorderBrush="#FF006CFD" BorderThickness="3" Width="70" Height="70"
+                            xf:Animations.PrimaryBinding="{Binding IsPressed, ElementName=SearchButton}"
+                            xf:Animations.Primary="{xf:Animate BasedOn={StaticResource FadeInAndContract}, Event=None}"
+                            >
+                        <Button Content="SEARCH" Padding="10" x:Name="SearchButton"        
                             Command="{Binding GetIpCommand}" 
-                            Margin="10" Background="Transparent" BorderBrush="{x:Null}" FocusVisualStyle="{x:Null}" Foreground="#FF006CFD" >
-                        <Button.RenderTransform>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                        </Button.RenderTransform>
+                            Background="Transparent" BorderBrush="Transparent" Foreground="#FF006CFD" >
                     </Button>
                 </Border>
             </StackPanel>
+        </Grid>
         </Grid>
 
         <!--Right side-->
 
 
-        <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="5" Margin="15">
+        <Grid Grid.Row="0" Grid.Column="1" Margin="15">
             <TabControl Grid.Column="1" Grid.Row="1">
                 <TabItem Header="Monitoring">
                     <Grid>
@@ -155,10 +166,6 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Port"/>
                                     <Label Content="{Binding Port}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Power Type"/>
-                                    <Label Content="{Binding Power}"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Battery Level"/>

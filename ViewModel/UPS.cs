@@ -39,6 +39,7 @@ namespace LABPOWER_APC.ViewModel
         [ObservableProperty]
         private string _MainPc;
 
+        [ObservableProperty]
         int _ShutdownTimeLeft;
  
         [ObservableProperty]
@@ -123,7 +124,8 @@ namespace LABPOWER_APC.ViewModel
         public UPSValidator validator = new UPSValidator();
         public UPS()
         {
-      
+
+            
 
             SaveDirectory = System.IO.Path.Combine(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Data"));
             SelectedDevices = new ObservableCollection<NetworkDevice>();
@@ -196,6 +198,9 @@ namespace LABPOWER_APC.ViewModel
             {
                 Interval = TimeSpan.FromSeconds(10)
             };
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+
 
             // Load saved devices
             Devices = new ObservableCollection<NetworkDevice>();
@@ -211,8 +216,7 @@ namespace LABPOWER_APC.ViewModel
             //Shutdowning upc after hibernation or sleep mode
             //SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             SystemEvents.SessionEnding += SystemEvents_SessionEnding;
-
-
+            ShutdownTimeLeft = Settings.ShutdownTimeLeft;
         }
 
         private void PortManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -222,8 +226,7 @@ namespace LABPOWER_APC.ViewModel
                 PortManager.WriteAndWaitForResponse("Y", 100);
                 // Timer to update data every 10 seconds
 
-                _timer.Tick += Timer_Tick;
-                _timer.Start();
+               
 
 
             }
@@ -257,13 +260,24 @@ namespace LABPOWER_APC.ViewModel
             string cleanedInput = (InputVoltage?.Trim() ?? string.Empty).Replace(".",",");
             string cleanedInpu2 = (OutputVoltage?.Trim() ?? string.Empty).Replace(".", ",");
             string cleanedInpu3 = (BatteryLevel?.Trim() ?? string.Empty).Replace(".", ",");
+
             // Simulate data update
+            if (OutputVoltageSeries[0] != null && double.TryParse(cleanedInput, out double parsedInput))
+            {
+                OutputVoltageSeries[0].Values.Add(parsedInput);
+            }
 
-                OutputVoltageSeries[0].Values.Add(double.Parse(cleanedInput));
-                OutputVoltageSeries[1].Values.Add(double.Parse(cleanedInpu2));
-                BatteryLevelSeries[0].Values.Add(double.Parse(cleanedInpu3));
-                TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
+            if (OutputVoltageSeries[1] != null && double.TryParse(cleanedInpu2, out double parsedInpu2))
+            {
+                OutputVoltageSeries[1].Values.Add(parsedInpu2);
+            }
 
+            if (BatteryLevelSeries[0] != null && double.TryParse(cleanedInpu3, out double parsedInpu3))
+            {
+                BatteryLevelSeries[0].Values.Add(parsedInpu3);
+            }
+
+            TimeLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
             // Keep only the last 10 values
             if (OutputVoltageSeries[0].Values.Count > 10 || OutputVoltageSeries[1].Values.Count > 10 || BatteryLevelSeries[0].Values.Count > 10)
             {
@@ -294,12 +308,13 @@ namespace LABPOWER_APC.ViewModel
             }
         }
 
+        // Add a boolean flag to track if the action has been performed already
+        private bool isFirstTime = true;
+
         void Status_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-
             Port = Settings.PortName;
             string powerType = Status.PowerType.ToString();
-            Power = powerType;
 
             switch (e.PropertyName)
             {
@@ -323,9 +338,9 @@ namespace LABPOWER_APC.ViewModel
                     break;
             }
 
-            if (Power.Equals("Battery"))
+            if (powerType.Equals("Battery"))
             {
-                 if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
+                if (Status.PowerType == UPSStatus.PowerTypeEnum.Battery)
                 {
                     computerShutdownTimer = new Timer();
                     computerShutdownTimer.Interval = 1000;
@@ -337,7 +352,7 @@ namespace LABPOWER_APC.ViewModel
                     if (computerShutdownTimer != null)
                     {
                         computerShutdownTimer.Stop();
-                        _ShutdownTimeLeft = Settings.ShutdownTimeLeft;
+                        ShutdownTimeLeft = Settings.ShutdownTimeLeft;
                     }
                 }
             }
@@ -345,11 +360,11 @@ namespace LABPOWER_APC.ViewModel
 
         void computerShutdownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _ShutdownTimeLeft -= 1;
-            if (_ShutdownTimeLeft <= 0)
+            ShutdownTimeLeft -= 1;
+            if (ShutdownTimeLeft <= 0)
             {
                 computerShutdownTimer.Stop();
-                chosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
+                ChosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
                 ShutdownGracefully();
                 //Process.Start("shutdown", "/s /t 0");
             }
@@ -360,28 +375,17 @@ namespace LABPOWER_APC.ViewModel
         /// </summary>
         public void ShutdownGracefully()
         {
-            
-            _ShutdownTimeLeft = (Settings.ShutdownTimeLeft = 20);
 
-            PortManager.WriteSerial("Y");
-            Thread.Sleep(150);
-            PortManager.WriteSerial("U");
+            PortManager.WriteAndWaitForResponse("Y",100);
             Thread.Sleep(150);
             string listen = PortManager.WriteAndWaitForResponse("S", 100);
-            int numTries = 0;
-            int maxTries = 15;
-            while (listen != "OK" && numTries < maxTries)
+
+            while (listen != "OK")
             {
                 Thread.Sleep(50);
                 listen = PortManager.WriteAndWaitForResponse("S", 100);
-                numTries++;
             }
-            _ShutdownTimeLeft = Settings.ShutdownTimeLeft;
-
-            PortManager.WriteSerial("K");
-            Thread.Sleep(750);
-            PortManager.WriteSerial("K");
-            //Tries = 1;
+            PortManager.Dispose();
         }
 
         /// <summary>-----
@@ -530,7 +534,7 @@ namespace LABPOWER_APC.ViewModel
                     var chosenDevice = new ChosenNetworkDevice
                     {
                         IPAddress = device.IPAddress,
-                        HostName = device.HostName,
+                        HostName = device.HostName.Replace(".labortech.local", string.Empty),
 
                     };
                     ChosenNetworkDevices.Add(chosenDevice);
@@ -587,7 +591,7 @@ namespace LABPOWER_APC.ViewModel
 
         private void CloseWindow()
         {
-            chosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
+            ChosenNetworkDevices = XmlHelper.Deserialize<ObservableCollection<ChosenNetworkDevice>>(conDevFile);
 
         }
     }
