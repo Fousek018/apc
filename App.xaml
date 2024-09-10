@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:LABPOWER_APC"
              xmlns:View="clr-namespace:LABPOWER_APC.View"
+             xmlns:Utilities="clr-namespace:LABPOWER_APC.Utilities"
              xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
@@ -12,9 +13,12 @@
         </DataTemplate>
 
 
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Animations.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Animations.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+            
+            
         </ResourceDictionary>
 
     </Application.Resources>

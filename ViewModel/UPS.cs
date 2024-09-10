@@ -35,6 +35,8 @@ namespace LABPOWER_APC.ViewModel
         // Přidejte kolekci pro hodnoty výčtu
 
         private string computerName;
+        [ObservableProperty]
+        private bool _BtnPressed = false; 
 
         [ObservableProperty]
         private string _MainPc;
@@ -473,7 +475,7 @@ namespace LABPOWER_APC.ViewModel
         {
             _cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = _cancellationTokenSource.Token;
-
+            BtnPressed = true;
             Devices.Clear();
             var process = new Process
             {

@@ -256,4 +256,13 @@
 						  Kind="FadeFrom,RotateTo"
 						  Opacity="0"
 						  Rotation="360" />
+
+    <xf:AnimationSettings x:Key="SearchBtn"
+					      Kind="ScaleXTo,ScaleYTo,TranslateYTo"
+						  ScaleX="{StaticResource SmallScaleFactor}"
+						  ScaleY="{StaticResource SmallScaleFactor}"
+                          OffsetY="{StaticResource PositiveOffset}"/>
+
+
+
 </ResourceDictionary>
