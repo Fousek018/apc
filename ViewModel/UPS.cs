@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows.Forms;
+using System.Windows.Media;
 using System.Windows.Threading;
 using static LABPOWER_APC.Model.UPSStatus;
 using Timer = System.Timers.Timer;
@@ -188,6 +189,11 @@ namespace LABPOWER_APC.ViewModel
                 new LineSeries
                 {
                     Title = "Battery Level",
+                    Stroke = new SolidColorBrush(Colors.GreenYellow),
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    LineSmoothness = 1,
+                    StrokeThickness = 5,
+
                     Values = new ChartValues<double>()
                 }
             };

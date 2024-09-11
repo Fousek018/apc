@@ -5,6 +5,7 @@
              xmlns:View="clr-namespace:LABPOWER_APC.View"
              xmlns:Utilities="clr-namespace:LABPOWER_APC.Utilities"
              xmlns:ViewModel="clr-namespace:LABPOWER_APC.ViewModel"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
@@ -15,8 +16,12 @@
 
 
         <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="Animations.xaml" />
-        </ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                <ResourceDictionary Source="Animations.xaml" />
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="LightGreen" />
+
+
+            </ResourceDictionary.MergedDictionaries>
             
             
         </ResourceDictionary>

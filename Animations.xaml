@@ -36,7 +36,8 @@
     <xf:AnimationSettings x:Key="Expand"
 						  Kind="ScaleXTo,ScaleYTo"
 						  ScaleX="{StaticResource LargeScaleFactor}"
-						  ScaleY="{StaticResource LargeScaleFactor}" />
+						  ScaleY="{StaticResource LargeScaleFactor}"
+                          />
 
     <!-- Scale from a larger value -->
     <xf:AnimationSettings x:Key="Contract"
