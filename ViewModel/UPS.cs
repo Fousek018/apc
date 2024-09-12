@@ -175,11 +175,15 @@ namespace LABPOWER_APC.ViewModel
             new LineSeries
                  {
                     Title = "Output Voltage",
+                    Stroke = new SolidColorBrush(Colors.DarkRed),
+                    Fill = new SolidColorBrush(Colors.Transparent),
                     Values = new ChartValues<double>()
                 },
             new LineSeries
                {
-                   Title = "New Output Voltage",
+                   Title = "Input Voltage",
+                   Stroke = new SolidColorBrush(Colors.LightBlue),
+                   Fill = new SolidColorBrush(Colors.Transparent),
                    Values = new ChartValues<double>()
                }
                 };

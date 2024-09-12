@@ -13,10 +13,10 @@
         xmlns:xf="clr-namespace:XamlFlair;assembly=XamlFlair.WPF"
         xmlns:xfc="clr-namespace:XamlFlair.Controls;assembly=XamlFlair.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-
+        WindowStyle="SingleBorderWindow"
         TextElement.FontSize="14"
         FontFamily="{materialDesign:RobotoFont}"
-         
+        Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
         Title="UPSVIEW" Height="900" Width="1500 ">
 
@@ -38,7 +38,7 @@
 
             <!--Header-->
 
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0" Margin="0 0 30 0">
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.5*"/>
@@ -50,6 +50,7 @@
                 <Grid Grid.Row="0">
                     <TextBlock x:Name="MainPcTextBlock" 
                            Text="{Binding MainPc,FallbackValue=MainPC}" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
                            HorizontalAlignment="Center" 
                            VerticalAlignment="Center"/>
 
@@ -82,8 +83,8 @@
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
-                                    <materialDesign:PackIcon Kind="RemoteDesktop"  HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Width="70" Height="40"/>
-                                    <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center" Grid.Row="1"  Grid.ColumnSpan="2"/>
+                                     <materialDesign:PackIcon Kind="RemoteDesktop" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Width="70" Height="40"/>
+                                     <TextBlock Text="{Binding HostName}" HorizontalAlignment="Center" Grid.Row="1"  Grid.ColumnSpan="2"/>
                                     <TextBlock Text="{Binding IPAddress}" HorizontalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2"/>
                                     <TextBlock Text="{Binding nameOfTaks}" HorizontalAlignment="Center" Grid.Row="3" Grid.ColumnSpan="2"  xf:Animations.Primary="{StaticResource FadeInAndSlideFromTop}"/>
                                     <TextBlock Text="{Binding timeOfexecute  }" HorizontalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2"/>
@@ -107,7 +108,8 @@
 
             <Grid x:Name="listofsearch" Grid.Row="2" Grid.RowSpan="2">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top"
-                            Visibility="{Binding BtnPressed, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding BtnPressed, Converter={StaticResource BoolToVisibilityConverter}}"
+                            xf:Animations.Primary="{xf:Animate BasedOn={StaticResource  Expand}, Duration=30, Event=Visibility}">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Button Command="{Binding StopGetIpCommand}" Style="{StaticResource MaterialDesignFlatButton}">
                             <StackPanel Orientation="Horizontal">
@@ -167,10 +169,10 @@
 
 
         <Grid Grid.Row="0" Grid.Column="1" Margin="15">
-            <TabControl Grid.Column="1" Grid.Row="1">
+            <TabControl Grid.Column="1" Grid.Row="1" Style="{StaticResource MaterialDesignFilledTabControl}">
                 <TabItem Header="Monitoring">
                     <materialDesign:Card>
-                    <Grid>
+                    <Grid Margin="20 0 20 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*"/>
@@ -178,11 +180,11 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid Grid.ColumnSpan="2" Margin="0" Grid.Row="0">
-                            <Label x:Name="Header" Content="APC monitoring" Margin="0 40 0 10"
+                            <TextBlock x:Name="Header" Text="APC Monitoring" Margin="0 40 0 10" Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                                    VerticalAlignment="Center" HorizontalAlignment="Center" />
                         </Grid>
                         <!--Moniored property-->
@@ -235,8 +237,9 @@
                                 </Grid>
                             </StackPanel>
                         </Grid>
-                            <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 10" VerticalAlignment="Bottom">
-                                <!-- Output Voltage Chart -->
+                            <Grid Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="0 10 0 10" VerticalAlignment="Bottom">
+                                <StackPanel>
+                                    <!-- Output Voltage Chart -->
                                 <lvc:CartesianChart Series="{Binding BatteryLevelSeries}" Height="150" Hoverable="False" >
                                     <lvc:CartesianChart.AxisX>
                                         <lvc:Axis Title="Time" FontSize="13" Labels="{Binding TimeLabels}"/>
@@ -247,9 +250,8 @@
                                                 MaxValue="100" LabelFormatter="{Binding BatteryCapacity}"/>
                                     </lvc:CartesianChart.AxisY>
                                 </lvc:CartesianChart>
-                            </Grid>
-                            <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="0 10 0 10" VerticalAlignment="Bottom">
-                            <!-- Output Voltage Chart -->
+
+                                <!-- Output Voltage Chart -->
 
                                 <lvc:CartesianChart Series="{Binding OutputVoltageSeries}" Height="150">
                                     <lvc:CartesianChart.AxisX>
@@ -261,12 +263,14 @@
                                                MaxValue="250" LabelFormatter="{Binding VoltageFormatter}"/>
                                 </lvc:CartesianChart.AxisY>
                             </lvc:CartesianChart>
-                        </Grid>
+                                </StackPanel>
+                            </Grid>
 
                     </Grid>
                     </materialDesign:Card>
                 </TabItem>
                 <TabItem Header="Settings">
+                    <materialDesign:Card>
                     <Grid Margin="30 0 30 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -378,6 +382,7 @@
                         <Button Content="Save" Command="{Binding SaveGracefulDelayCommand}" 
                                 Margin="10 30 10 10" VerticalAlignment="Bottom" Grid.Row="3" Grid.ColumnSpan="2"/>
                     </Grid>
+                    </materialDesign:Card>
                 </TabItem>
             </TabControl>
         </Grid>

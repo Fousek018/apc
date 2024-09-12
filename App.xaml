@@ -18,7 +18,7 @@
         <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
                 <ResourceDictionary Source="Animations.xaml" />
-                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="LightGreen" />
+                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Blue" SecondaryColor="DeepOrange" />
 
 
             </ResourceDictionary.MergedDictionaries>
